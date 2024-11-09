@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -29,11 +30,11 @@ public class PlayerController : MonoBehaviour
 
     [Header("Keybinds")]
     [SerializeField] private KeyCode jumpKey = KeyCode.Space;
-    [SerializeField] private KeyCode interactKey = KeyCode.E;
 
     [Header("Interaction")]
-    [SerializeField] private Weapon weaponEquiped;
+    [SerializeField] public Weapon weaponEquiped = null;
     [SerializeField] private int interactRange;
+    private IInteractable interactableObject;
 
     private float horizontalInput;
     private float verticalInput;
@@ -49,15 +50,13 @@ public class PlayerController : MonoBehaviour
         readyToJump = true;
     }
 
-    // Update is called once per frame
     void Update()
     {   
         MyInput();
         Move();
         SpeedControl();
-        CheckForInteraction();
 
-        if(Input.GetButtonDown("Fire1") && weaponEquiped != null)
+        if (Input.GetButtonDown("Fire1") && weaponEquiped != null)
         {
             weaponEquiped.Fire();
         }
@@ -104,27 +103,6 @@ public class PlayerController : MonoBehaviour
             rb.velocity = new Vector3(limitedVel.x, rb.velocity.y, limitedVel.z);
         }
     }
-    private void CheckForInteraction()
-    {
-        RaycastHit hit;
-        Debug.DrawRay(transform.position, transform.forward * interactRange, Color.red);
-        
-        if (Physics.Raycast(transform.position, transform.forward, out hit, interactRange))
-        {
-            // Check if the object hit has an IInteractable component
-            IInteractable interactable = hit.collider.GetComponent<IInteractable>();
-            if (interactable != null)
-            {
-                // Call Interact on the interactable object
-                Debug.DrawRay(transform.position, transform.forward * interactRange, Color.green);
-
-                if (Input.GetKeyDown(interactKey))
-                {
-                    interactable.Interact();
-                }
-            }
-        }
-    }
     private void GroundCheck()
     {
         isGrounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, groundMask);
@@ -149,5 +127,22 @@ public class PlayerController : MonoBehaviour
     private void ResetJump()
     {
         readyToJump = true;
+    }
+
+    //Getters and Setters
+
+    public void SetWeaponEquiped(Weapon itemToEquip)
+    {
+        weaponEquiped = itemToEquip as Weapon;
+        print("Equiped: " + weaponEquiped.name);
+    }
+    public Weapon GetCurrentWeaponEquiped()
+    {
+        return weaponEquiped;
+    }
+    public void SetWeaponToNull()
+    {
+        weaponEquiped.gameObject.SetActive(false);
+        weaponEquiped = null;
     }
 }

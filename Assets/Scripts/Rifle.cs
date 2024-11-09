@@ -6,6 +6,7 @@ public class Rifle : Weapon
 {
     public override void Fire()
     {
+        base.Fire();
         Debug.Log("Rifle fired with damage: " + damage);
     }
 }
